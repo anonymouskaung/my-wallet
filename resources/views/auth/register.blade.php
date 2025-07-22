@@ -45,6 +45,7 @@
                                         <strong>{{ $message }}</strong>
                                     </span>
                                 @enderror
+                                <div class="form-text">Password must include at least one uppercase, one lowercase, one number and least 8 letter.</div>
 
                                 <label for="password-confirm" class="form-label">{{ __('Confirm Password') }}</label>
                                 <input id="password-confirm" type="password" class="form-control mb-3" name="password_confirmation" required autocomplete="new-password">

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('money_flow');
             $table->string('content')->nullable();
             $table->string('photo')->nullable();
+            $table->integer('user_id');
             $table->timestamps();
         });
     }

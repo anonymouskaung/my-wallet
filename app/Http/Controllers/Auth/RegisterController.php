@@ -53,7 +53,7 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users'],
             'phone' => ['nullable', 'string', 'regex:/^[0-9]{6,15}$/', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'min:8', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/', 'confirmed'],
         ])->after(function ($validator) use ($data) {
             if (empty($data['email']) && empty($data['phone'])) {
                 $validator->errors()->add('email', 'Either email or phone is required.');

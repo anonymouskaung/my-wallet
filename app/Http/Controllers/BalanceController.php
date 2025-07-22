@@ -8,14 +8,15 @@ use App\Models\Balance;
 class BalanceController extends Controller
 {
     public function added(Request $request) {
-        $addedBalance = Balance::where('money_flow', 'added')->sum('amount') ?? 0;
-        $usedBalance = Balance::where('money_flow', 'used')->sum('amount') ?? 0;
+        $addedBalance = Balance::where('user_id', auth()->user()->id)->where('money_flow', 'added')->sum('amount') ?? 0;
+        $usedBalance = Balance::where('user_id', auth()->user()->id)->where('money_flow', 'used')->sum('amount') ?? 0;
         $currentBalance = $addedBalance - $usedBalance;
         $balance = new Balance;
         if($balance) {
             $balance->amount = $request->addedAmount;
             $balance->money_flow = 'added';
             $balance->content = $request->topupDescription;
+            $balance->user_id = auth()->user()->id;
             $balance->save();
             $amount = $currentBalance + $request->addedAmount;
             $created_at = date('j M Y');
@@ -35,8 +36,8 @@ class BalanceController extends Controller
         ]);
     }
     public function used(Request $request) {
-        $addedBalance = Balance::where('money_flow', 'added')->sum('amount') ?? 0;
-        $usedBalance = Balance::where('money_flow', 'used')->sum('amount') ?? 0;
+        $addedBalance = Balance::where('user_id', auth()->user()->id)->where('money_flow', 'added')->sum('amount') ?? 0;
+        $usedBalance = Balance::where('user_id', auth()->user()->id)->where('money_flow', 'used')->sum('amount') ?? 0;
         $currentBalance = $addedBalance - $usedBalance;
         $balance = new Balance;
         if($balance) {
@@ -44,14 +45,13 @@ class BalanceController extends Controller
                 $balance->amount = $request->usedAmount;
                 $balance->money_flow = 'used';
                 $balance->content = $request->payDescription;
+                $balance->user_id = auth()->user()->id;
                 $balance->save();
                 $amount = $currentBalance - $request->usedAmount;
                 $created_at = date('j M Y');
             } else {
                 return response()->json(['error' => true]);
             }
-        } else {
-            return response()->json(['success' => false]);
         }
 
         return response()->json([

@@ -13,10 +13,10 @@ class HomeController extends Controller
     }
     public function index()
     {
-        $addedBalance = Balance::where('money_flow', 'added')->sum('amount') ?? 0;
-        $usedBalance = Balance::where('money_flow', 'used')->sum('amount') ?? 0;
+        $addedBalance = Balance::where('user_id', auth()->user()->id)->where('money_flow', 'added')->sum('amount') ?? 0;
+        $usedBalance = Balance::where('user_id', auth()->user()->id)->where('money_flow', 'used')->sum('amount') ?? 0;
         $balance = $addedBalance - $usedBalance;
-        $inboxes = Balance::select('id', 'amount', 'money_flow', 'content', 'photo', 'created_at')->orderBy('id', 'desc')->get();
+        $inboxes = Balance::where('user_id', auth()->user()->id)->select('id', 'amount', 'money_flow', 'content', 'photo', 'created_at')->orderBy('id', 'desc')->get();
 
         $agent = new Agent();
         if($agent->isMobile()) {

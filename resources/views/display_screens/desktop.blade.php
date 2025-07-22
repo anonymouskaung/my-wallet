@@ -49,6 +49,11 @@
             background-color: #ddd;
             color: black;
         }
+
+        #balanceAmount {
+            font-size: 1.5rem;
+            font-weight:normal;
+        }
     </style>
 </head>
 
@@ -61,22 +66,9 @@
                         <div class="card-header"
                             style="font-size: 1.1rem; color: #343a40; font-weight: 600; border-left: 6px solid #0d6efd;">
                             My Wallet
-                            @guest
-                            <span class="btn-group float-end rounded-pill bg-success">
-                                @if(Route::has('register'))
-                                <a href="{{ route('register') }}" class="btn rounded-start-pill"
-                                    style="width: 80px;">Sign
-                                    up</a>
-                                @endif
-                                @if(Route::has('login'))
-                                <a href="{{ route('login') }}" class="btn btn-primary rounded-pill"
-                                    style="width: 100px;">Sign in</a>
-                                @endif
-                            </span>
-                            @endguest
                         </div>
                         <div class="card-body d-flex align-items-center mb-1 mb-md-5">
-                            <img src="{{ asset('images/profiles/' . auth()->user()->photo) }}"
+                            <img src="{{ asset('images/profiles/' . (auth()->user()->photo ?? 'profile.png')) }}"
                                 style="height: 80px; width: 80px;" class="rounded-circle me-2" alt="Profile Photo">
                             <div>
                                 <div>
@@ -85,7 +77,7 @@
                                     </strong>
                                 </div>
                                 <div>
-                                    <span>
+                                    <span style="font-size: 1.2rem; font-weight: bold;">
                                         <i class="fa-solid fa-wallet"></i>
                                         Balance:
                                     </span>
@@ -227,7 +219,7 @@
                                 </span>
                                 <button id="recover-phone-button" type="button" onclick="rotate(this, 90)"
                                     data-bs-toggle="collapse" data-bs-target="#recover-phone-content"
-                                    class="list-group-item list-group-item-action">
+                                    class="list-group-item list-group-item-action text-dark">
                                     <i class="fa-solid fa-square-phone me-2"></i>
                                     Edit Phone Number
                                     <span class="float-end text-muted">
@@ -247,7 +239,7 @@
                                     </form>
                                 </div>
                                 <button id="recover-email-button" type="button" onclick="rotate(this, 90)"
-                                    class="list-group-item list-group-item-action" data-bs-toggle="collapse"
+                                    class="list-group-item list-group-item-action text-dark" data-bs-toggle="collapse"
                                     data-bs-target="#recover-email-content">
                                     <i class="fa-solid fa-envelope me-2"></i>
                                     Edit Email Address
@@ -267,7 +259,7 @@
                                 </div>
                                 <button id="saved-name-button" type="button" onclick="rotate(this, 90)"
                                     data-bs-toggle="collapse" data-bs-target="#edit-name-content"
-                                    class="list-group-item list-group-item-action">
+                                    class="list-group-item list-group-item-action text-dark">
                                     <i class="fa-regular fa-pen-to-square me-2"></i>
                                     Edit Profile Name
                                     <span class="float-end text-muted">
@@ -286,7 +278,7 @@
                                 </div>
                                 <button id="saved-photo-button" onclick="rotate(this, 90)" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#edit-photo-content"
-                                    class="list-group-item list-group-item-action">
+                                    class="list-group-item list-group-item-action text-dark">
                                     <i class="fa-regular fa-circle-user me-2"></i>
                                     Edit Profile Photo
                                     <span class="float-end text-muted">
@@ -303,7 +295,7 @@
                                     </form>
                                 </div>
                                 <button id="change-password" type="button"
-                                    class="list-group-item list-group-item-action" onclick="confirmPasswordModal()">
+                                    class="list-group-item list-group-item-action text-dark" onclick="confirmPasswordModal()">
                                     <i class="fa-solid fa-lock me-2"></i>
                                     Change Password
                                 </button>
@@ -320,7 +312,7 @@
                                 <span class="list-group-item text-muted border-bottom-0" disabled>
                                     Setting
                                 </span>
-                                <button type="button" onclick="rotate(this, 90)"
+                                <button type="button" onclick="switchLanguage()"
                                     class="list-group-item list-group-item-action">
                                     <i class="fa-solid fa-earth-asia me-2"></i>
                                     Switch Language
@@ -722,15 +714,27 @@
                             const result = await response.json();
                             if (result.success) {
                                 const data = result.data;
-                                document.querySelector('#phone').textContent = data.phone;
-                                recoverPhoneForm.reset();
+                                const phone = document.querySelector('#phone');
                                 //alert
-                                successAlert('Recover Phone', null, 'added');
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    timer: 1500,
+                                    showConfirmButton: false,
+                                    position: 'top-end',
+                                }).then(() => {
+                                    if(phone) {
+                                        phone.textContent = data.phone;
+                                    } else {
+                                        location.reload();
+                                    }
+                                });
                                 document.querySelector('#recover-phone-button').click();
                             }
                         } catch (error) {
                             alert('Oops! Something went wrong.');
                         } finally {
+                            recoverPhoneForm.reset();
                             saveBtn.disabled = false;
                             saveBtn.textContent = originalText;
                         }
@@ -774,11 +778,20 @@
                             const result = await response.json();
                             if (result.success) {
                                 const data = result.data;
-                                document.querySelector('#email').textContent = data.email;
-                                recoverEmailForm.reset();
-                                //alert
-                                successAlert('Recover Email', null, 'added');
-                                //
+                                const email = document.querySelector('#email');
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    timer: 1500,
+                                    showConfirmButton: false,
+                                    position: 'top-end',
+                                }).then(() => {
+                                    if(email) {
+                                        email.textContent = data.email;
+                                    } else {
+                                        location.reload();
+                                    }
+                                });
                                 document.querySelector('#recover-email-button').click();
                             } else {
                                 failAlert(result.message);
@@ -786,6 +799,7 @@
                         } catch (error) {
                             alert('Oops! Something went wrong.');
                         } finally {
+                            recoverEmailForm.reset();
                             saveBtn.disabled = false;
                             saveBtn.textContent = originalText;
                         }
@@ -838,7 +852,7 @@
                                                     <small class="text-muted">${data.created_at}</small>
                                                     <div>
                                                         <h6>Money ${data.money_flow}</h6>
-                                                        <p class="text-dark">You ${data.money_flow} ${data.added_amount}Ks.</p>
+                                                        <p class="text-dark">You ${data.money_flow} ${data.added_amount} Ks.</p>
                                                         ${inboxContent}
                                                     </div>
                                                 </div>
@@ -928,14 +942,14 @@
                                     icon: 'warning',
                                     title: 'Insufficient Balance!',
                                     text: 'Used amount cannot exceed current balance.',
-                                    confirmButtonText: 'OK',
-                                    confirmButtonColor: 'yellow',
+                                    confirmButtonText: 'Got it',
+                                    confirmButtonColor: '#ffc107', // Bootstrap yellow
+                                    background: '#fffbe6',          // Soft yellow background
+                                    color: '#856404', 
                                 });
-                            } else {
-                                failAlert('Payment');
                             }
                         } catch (error) {
-                            alert('Oops! Something went wrong. Error: ' + error.message);
+                            alert('Error: ' + error.message);
                         } finally {
                             payForm.reset();
                             processingBtn.disabled = false;
@@ -953,6 +967,19 @@
                 console.error('DOM error:', err);
             }
         });
+        function switchLanguage() {
+            Swal.fire({
+                title: 'Choose Language',
+                input: 'radio',
+                inputOptions: {
+                    en: 'English',
+                    my: 'မြန်မာ',
+                },
+                inputValue: 'en',
+                confirmButtonText: 'Switch',
+                showCancelButton: true,
+            });
+        }
     </script>
 </body>
 

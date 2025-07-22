@@ -53,18 +53,6 @@
             transition: none;
         }
 
-        .overlay {
-            width: 100%;
-            height: 100vh;
-            display: none;
-            position: fixed;
-            z-index: 2;
-            top: 0;
-            left: 0;
-            background-color: white;
-            pointer-events: all;
-        }
-
         .nav-index {
             z-index: 1;
         }
@@ -85,6 +73,9 @@
         .layout-footer {
             padding: 8px;
         }
+        #password-change.offcanvas {
+            z-index: 1060;
+        }
     </style>
 </head>
 
@@ -93,7 +84,7 @@
         <!-- Header -->
         <div class="card wallet-header mb-2">
             <div class="card-body d-flex align-items-center">
-                <img src="{{ asset('images/profiles/' . auth()->user()->photo) }}"
+                <img src="{{ asset('images/profiles/' . (auth()->user()->photo ?? 'profile.png')) }}"
                     class="rounded-circle profile-img me-3" alt="Profile Photo">
                 <div>
                     <div id="profile-name" class="fw-bold" style="font-family: 'Times New Roman', Times, serif;">{{
@@ -255,38 +246,42 @@
                         </form>
                     </div>
                     <button id="change-password" type="button" class="list-group-item list-group-item-action"
-                        onclick="openPage('change-password-home')">
+                        data-bs-toggle="modal" data-bs-target="#change-password-home">
                         <i class="fa-solid fa-lock"></i>
                         Change Password
                     </button>
-                    <div id="change-password-home" class="overlay">
-                        <form id="password-confirm-form">
-                            <div class="layout-header">
-                                <button type="reset" class="btn p-1" style="font-size: x-large; font-weight: bold;"
-                                    onclick="closePage('change-password-home')">
-                                    <i class="fa-solid fa-chevron-left"></i>
-                                </button>
+                    <div id="change-password-home" class="modal" tabindex="-1">
+                        <div class="modal-dialog modal-fullscreen">
+                            <div class="modal-content">
+                                <form id="password-confirm-form">
+                                    <div class="layout-header">
+                                        <button type="reset" class="btn p-1" style="font-size: x-large; font-weight: bold;"
+                                            data-bs-dismiss="modal">
+                                            <i class="fa-solid fa-chevron-left"></i>
+                                        </button>
+                                    </div>
+                                    <div class="layout-body">
+                                        <h1 class="mb-5">
+                                            Confirm your account
+                                        </h1>
+                                        <div class="mb-3 position-relative">
+                                            <input id="password-confirm" type="password" name="password" class="form-control form-control-lg pe-5"
+                                                placeholder="Enter current password.">
+                                            <button type="button" class="btn btn-lg position-absolute top-50 end-0 translate-middle-y border-0"
+                                            onclick="togglePasswordVisibility('password-confirm', this)">
+                                                <i class="fa-regular fa-eye-slash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="layout-footer">
+                                        <button id="password-confirm-submit" type="submit"
+                                            class="btn btn-primary w-100 rounded-5 text-white">
+                                            Next
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                            <div class="layout-body">
-                                <h1 class="mb-5">
-                                    Confirm your account
-                                </h1>
-                                <div class="mb-3 position-relative">
-                                    <input id="password-confirm" type="password" name="password" class="form-control form-control-lg pe-5"
-                                        placeholder="Enter current password.">
-                                    <button type="button" class="btn btn-lg position-absolute top-50 end-0 translate-middle-y border-0"
-                                    onclick="togglePasswordVisibility('password-confirm', this)">
-                                        <i class="fa-regular fa-eye-slash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="layout-footer">
-                                <button id="password-confirm-submit" type="submit"
-                                    class="btn btn-primary w-100 rounded-5 text-white">
-                                    Next
-                                </button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
                     <div class="offcanvas offcanvas-end bg-white" tabindex="-1" id="password-change"
                         style="height: 100vh;">
@@ -335,7 +330,7 @@
                 </div>
                 <div class="list-group rounded-top-0">
                     <span class="list-group-item text-muted">Setting</span>
-                    <button type="button" class="list-group-item list-group-item-action">
+                    <button type="button" class="list-group-item list-group-item-action" onclick="switchLanguage()">
                         Switch Language
                     </button>
                 </div>
@@ -885,6 +880,7 @@
                     } catch (err) {
                         alert('Error:' + err.message);
                     } finally {
+                        passwordConfirmForm.reset();
                         btn.disabled = false;
                         btn.textContent = 'Next';
                     }
@@ -943,7 +939,11 @@
                                 if(offcanvas) {
                                     offcanvas.hide();
                                 }
-                                closePage('change-password-home');
+                                const modalElement = document.querySelector('#change-password-home');
+                                const modal = bootstrap.Modal.getInstance(modalElement);
+                                if(modal) {
+                                    modal.hide();
+                                }
                             });
                         }
                     } catch (err) {
@@ -956,13 +956,6 @@
                 });
             } 
         });
-        function openPage(id) {
-            document.getElementById(id).style.display = 'block';
-        }
-        function closePage(id) {
-            document.getElementById(id).style.display = 'none';
-            document.querySelector('#password-confirm-form').reset();
-        }
         function togglePasswordVisibility(id, btn) {
             const input = document.getElementById(id);
             const icon = btn.querySelector('i');
@@ -973,6 +966,19 @@
                 input.type = 'password';
                 icon.classList.replace('fa-eye', 'fa-eye-slash');
             }
+        }
+        function switchLanguage() {
+            Swal.fire({
+                title: 'Choose Language',
+                input: 'radio',
+                inputOptions: {
+                    en: 'English',
+                    my: 'မြန်မာ',
+                },
+                inputValue: 'en',
+                confirmButtonText: 'Switch',
+                showCancelButton: true,
+            });
         }
     </script>
 </body>
